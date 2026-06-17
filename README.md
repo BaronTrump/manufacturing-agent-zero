@@ -14,21 +14,102 @@ A localized, multilingual AI agent for industrial auto part manufacturers, built
 
 ## Quick Start
 
+### Prerequisites
+- **Docker** 24+ ([install](https://docs.docker.com/engine/install/))
+- **Docker Compose** (included with Docker Desktop)
+- 16 GB RAM minimum (32 GB recommended)
+
+### Step 1 — Clone and Launch
 ```bash
-# macOS / Linux
-curl -fsSL https://bash.manufacturing-agent.ai | bash
-
-# Windows PowerShell
-irm https://ps.manufacturing-agent.ai | iex
-
-# Or with Docker directly:
-docker run -p 80:80 \
-  -v manufacturing_data:/a0/usr \
-  -v company_kb:/a0/knowledge/company \
-  barontrump/manufacturing-agent
+git clone https://github.com/BaronTrump/manufacturing-agent-zero.git
+cd manufacturing-agent-zero
+docker compose -f docker/docker-compose.yml up -d
 ```
 
-Open the Web UI, select your agent profile, and start working.
+### Step 2 — Open the Web UI
+Navigate to **http://localhost** in your browser.
+
+### Step 3 — Configure an LLM
+From the Web UI settings, choose one:
+
+| Provider | Setup | Internet Required? |
+|----------|-------|-------------------|
+| **Ollama** (local) | `docker compose --profile local-llm up -d` then run `ollama pull llama3` inside the container | No (after initial pull) |
+| **OpenAI / Anthropic** | Enter your API key in Settings | Yes |
+| **Any OpenAI-compatible** | Point at your own server's `api_base` | Depends on your server |
+
+### Step 4 — Select an Agent Profile
+Click the agent selector in the top bar and choose from:
+- Manufacturing Engineer, Quality Inspector, Production Planner, Maintenance Tech, or Purchasing Agent
+
+### Step 5 — Start Working
+Type your manufacturing question in the chat, for example:
+> *"What is the PFMEA severity rating for a crack in a steering knuckle?"*
+> *"Calculate OEE with 420 min planned time, 380 min run time, 45 sec cycle, 600 parts, 580 good parts"*
+> *"Schedule preventive maintenance for CNC machine after 450 hours of operation"*
+
+---
+
+### Fully Air-Gapped / Offline Deployment
+For a completely offline setup with no external API calls:
+
+```bash
+# Clone on a machine with internet, then transfer the directory
+git clone https://github.com/BaronTrump/manufacturing-agent-zero.git
+
+# Start both the agent and local LLM
+docker compose --profile local-llm -f docker/docker-compose.yml up -d
+
+# Pull a model (needs internet once)
+docker compose exec ollama ollama pull llama3.1:8b
+
+# Everything now runs locally — disconnect from the internet
+# Configure Ollama as the LLM provider in the Web UI settings
+```
+
+### Windows Deployment
+```powershell
+git clone https://github.com/BaronTrump/manufacturing-agent-zero.git
+cd manufacturing-agent-zero
+docker compose -f docker/docker-compose.yml up -d
+```
+Then open **http://localhost** in your browser. For WSL2-backed Docker, ensure WSL2 integration is enabled in Docker Desktop settings.
+
+### Production Deployment
+For plant-floor deployment on a dedicated server or VM:
+
+```bash
+# Pull the latest
+git pull && docker compose -f docker/docker-compose.yml build
+
+# Run as a systemd service (Linux)
+sudo tee /etc/systemd/system/manufacturing-agent.service <<'EOF'
+[Unit]
+Description=Manufacturing Agent Zero
+After=docker.service
+
+[Service]
+WorkingDirectory=/opt/manufacturing-agent-zero
+ExecStart=/usr/bin/docker compose -f docker/docker-compose.yml up
+ExecStop=/usr/bin/docker compose -f docker/docker-compose.yml down
+Restart=always
+User=manufacturing
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now manufacturing-agent.service
+```
+
+### Updating
+```bash
+cd manufacturing-agent-zero
+git pull
+docker compose -f docker/docker-compose.yml build
+docker compose -f docker/docker-compose.yml up -d
+```
 
 ## Architecture
 
