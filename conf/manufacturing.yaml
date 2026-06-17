@@ -1,0 +1,48 @@
+# Manufacturing Agent Configuration
+
+# Default language (en, es, ko)
+default_language: en
+
+# Supported languages
+languages:
+  - code: en
+    name: English
+    native_name: English
+    locale: en_US.UTF-8
+  - code: es
+    name: Spanish
+    native_name: Español
+    locale: es_ES.UTF-8
+  - code: ko
+    name: Korean
+    native_name: 한국어
+    locale: ko_KR.UTF-8
+
+# Default agent profile
+default_agent: manufacturing-engineer
+
+# Vector store configuration
+vector_store:
+  type: faiss
+  path: /a0/data/vector-store
+  embedding_model: all-MiniLM-L6-v2
+  chunk_size: 512
+  chunk_overlap: 64
+  similarity_threshold: 0.7
+
+# Company knowledge base
+company_kb:
+  path: /a0/data/company-kb
+  auto_index: true
+  supported_formats:
+    - txt
+    - md
+    - pdf
+  max_document_size_mb: 50
+
+# Manufacturing domain configuration
+manufacturing:
+  default_oee_target: 85
+  default_shift_hours: 8
+  quality_metric_ppm_target: 100
+  maintenance_mtbf_target_hours: 500

@@ -1,0 +1,19 @@
+{
+  "name": "manufacturing-agent-zero",
+  "version": "1.0.0",
+  "description": "Localized multilingual AI agent for industrial auto part manufacturers",
+  "private": true,
+  "scripts": {
+    "start": "docker compose -f docker/docker-compose.yml up -d",
+    "stop": "docker compose -f docker/docker-compose.yml down",
+    "build": "docker build -f docker/Dockerfile -t barontrump/manufacturing-agent .",
+    "logs": "docker compose -f docker/docker-compose.yml logs -f",
+    "train": "python scripts/train.py",
+    "api": "python scripts/api_server.py",
+    "setup": "bash scripts/setup.sh"
+  },
+  "engines": {
+    "docker": ">=24.0"
+  },
+  "license": "MIT"
+}

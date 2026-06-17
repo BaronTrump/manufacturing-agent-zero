@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  manufacturing-agent:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: barontrump/manufacturing-agent:latest
+    container_name: manufacturing-agent
+    ports:
+      - "80:80"
+    volumes:
+      - manufacturing_data:/a0/usr
+      - company_kb:/a0/data/company-kb
+      - vector_store:/a0/data/vector-store
+      - agent_config:/a0/data/config
+      - ./knowledge/company:/a0/knowledge/company:ro
+    environment:
+      - DEFAULT_LANGUAGE=en
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          memory: 4G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Local LLM via Ollama (pre-configured for manufacturing)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: manufacturing-ollama
+    volumes:
+      - ollama_models:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          memory: 8G
+    profiles:
+      - local-llm
+
+volumes:
+  manufacturing_data:
+  company_kb:
+  vector_store:
+  agent_config:
+  ollama_models:
